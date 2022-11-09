@@ -142,3 +142,5 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
         }
     }
 }
+
+//TODO: searchCPT, removeCPT, findInRegionCPT, getInfoCPT, getCircCPT, percursoSimetrico, dfs, bfs
