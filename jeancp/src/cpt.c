@@ -73,9 +73,15 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
                 // se nao for vazio chama a funcao recursiva
                 else
                 {
-                    vfindo(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    if (vfindo != NULL)
+                    {
+                        vfindo(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    }
                     inseriu = insertCPT(atual->esq, x, y, info, vfindo, vfvoltando, extra);
-                    vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    if (vfvoltando != NULL)
+                    {
+                        vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    }
                     return inseriu;
                 }
             }
@@ -97,9 +103,15 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
                 // se nao for vazio chama a funcao recursiva
                 else
                 {
-                    vfindo(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    if (vfindo != NULL)
+                    {
+                        vfindo(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    }
                     inseriu = insertCPT(atual->dir, x, y, info, vfindo, vfvoltando, extra);
-                    vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    if (vfvoltando != NULL)
+                    {
+                        vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                    }
                     return inseriu;
                 }
             }
