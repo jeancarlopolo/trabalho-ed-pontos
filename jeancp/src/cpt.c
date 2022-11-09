@@ -67,6 +67,7 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
                     novo->info = info;
                     novo->esq = NULL;
                     novo->dir = NULL;
+                    novo->epsilon = atual->epsilon;
                     atual->esq = novo;
                     return true;
                 }
@@ -97,6 +98,7 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
                     novo->info = info;
                     novo->esq = NULL;
                     novo->dir = NULL;
+                    novo->epsilon = atual->epsilon;
                     atual->dir = novo;
                     return true;
                 }
@@ -129,6 +131,7 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
             novo->info = info;
             novo->esq = NULL;
             novo->dir = NULL;
+            novo->epsilon = a->epsilon;
             a->raiz = novo;
             return true;
         }
