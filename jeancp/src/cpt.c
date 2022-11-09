@@ -37,10 +37,10 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
     /**
      * Se a arvore for vazia, cria um novo no e o insere na raiz
      * Se nao for vazia, chama a funcao recursiva
-     * ?Mas a função recebe uma arvore e nao um no?
-     * ?Como a funcao recursiva vai saber onde ela está?
-     * ?Como a funcao recursiva vai saber se o no ja existe?
-     * ?Como a funcao recursiva vai saber o epsilon?
+     * Mas a função recebe uma arvore e nao um no?
+     * Como a funcao recursiva vai saber onde ela está?
+     * Como a funcao recursiva vai saber se o no ja existe?
+     * Como a funcao recursiva vai saber o epsilon?
      */
     struct arvore *a = b;
     struct node *atual = b;
@@ -143,4 +143,4 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
     }
 }
 
-//TODO: searchCPT, removeCPT, findInRegionCPT, getInfoCPT, getCircCPT, percursoSimetrico, dfs, bfs
+// searchCPT, removeCPT, findInRegionCPT, getInfoCPT, getCircCPT, percursoSimetrico, dfs, bfs
