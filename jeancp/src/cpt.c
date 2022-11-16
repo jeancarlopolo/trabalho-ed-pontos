@@ -22,6 +22,11 @@ struct arvore
     double epsilon;
 };
 
+struct numerosSalvos
+{
+    double xzao, yzao, xzinho, yzinho;
+};
+
 /** x1 < x2 = -1
  *  x1 = x2 = 0
  *  x1 > x2 = 1
@@ -52,8 +57,11 @@ CPTree createCPT(double epsilon)
 
 bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaNo vfvoltando, void *extra)
 {
+    if (b == NULL)
+    {
+        return false;
+    }
     struct arvore *a = b;
-    bool inseriu;
     // se a arvore for vazia, cria um novo no e o insere na raiz
     if (a->raiz == NULL)
     {
@@ -64,6 +72,7 @@ bool insertCPT(CPTree b, double x, double y, Info info, VisitaNo vfindo, VisitaN
         novo->esq = NULL;
         novo->dir = NULL;
         a->raiz = novo;
+        gerarCirculo(novo);
         return true;
     }
     // se nao for vazia chama a funcao recursiva na raiz
@@ -112,6 +121,7 @@ bool insertCPTNode(TreeNode a, double x, double y, Info info, VisitaNo vfindo, V
                 {
                     vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
                 }
+                gerarCirculo(atual);
                 return inseriu;
             }
         }
@@ -142,6 +152,7 @@ bool insertCPTNode(TreeNode a, double x, double y, Info info, VisitaNo vfindo, V
                 {
                     vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
                 }
+                gerarCirculo(atual);
                 return inseriu;
             }
         }
@@ -150,6 +161,10 @@ bool insertCPTNode(TreeNode a, double x, double y, Info info, VisitaNo vfindo, V
 
 bool searchCPT(CPTree b, double x, double y, Info *info, VisitaNo vfindo, VisitaNo vfvoltando, void *extra)
 {
+    if (b == NULL)
+    {
+        return false;
+    }
     struct arvore *a = b;
     if (a->raiz == NULL)
     {
@@ -227,6 +242,10 @@ bool searchCPTNode(TreeNode a, double x, double y, Info *info, VisitaNo vfindo, 
 
 bool removeCPT(CPTree b, double x, double y, Info *info, VisitaNo vfindo, VisitaNo vfvoltando, void *extra)
 {
+    if (b == NULL)
+    {
+        return false;
+    }
     struct arvore *a = b;
     if (a->raiz == NULL)
     {
@@ -289,6 +308,48 @@ bool removeCPTNode(TreeNode a, double x, double y, Info *info, VisitaNo vfindo, 
     }
     else
     {
+        if (comparar(x, atual->x, y, atual->y, arv->epsilon) == -1)
+        {
+            if (atual->esq == NULL)
+            {
+                return false;
+            }
+            else
+            {
+                if (vfindo != NULL)
+                {
+                    vfindo(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                }
+                achou = removeCPTNode(atual->esq, x, y, info, vfindo, vfvoltando, extra, b);
+                if (vfvoltando != NULL)
+                {
+                    vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                }
+                gerarCirculo(atual);
+                return achou;
+            }
+        }
+        else
+        {
+            if (atual->dir == NULL)
+            {
+                return false;
+            }
+            else
+            {
+                if (vfindo != NULL)
+                {
+                    vfindo(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                }
+                achou = removeCPTNode(atual->dir, x, y, info, vfindo, vfvoltando, extra, b);
+                if (vfvoltando != NULL)
+                {
+                    vfvoltando(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+                }
+                gerarCirculo(atual);
+                return achou;
+            }
+        }
         return false;
     }
 }
@@ -303,19 +364,78 @@ TreeNode sucessor(TreeNode a)
     return atual;
 }
 
-struct circulo gerarCirculo(TreeNode a)
+void acharMaiorMenor(double x, double y, Info info, double xc, double yc, double r, void *extra)
 {
-    struct node *atual = a;
-    struct circulo circ;
-    double maiorx, maiory, menorx, menory, centro, raio;
-    // O círculo deve conter dentro dele todos os filhos do node
-    // vai achar o maior ponto e o menor ponto dentre os filhos e o elemento
-    // dai o centro do círculo vai ser metade da soma das coordenadas
-    // raio vai ser metade da distância entre eles
-    // toda vez que um elemento for inserido ou removido o círculo de todos os elementos ancestrais deve ser atualizado
-    // 🤡🤡🤡
-    return circ;
+    struct numerosSalvos *maiores = extra;
+    if (x > maiores->xzao)
+    {
+        maiores->xzao = x;
+    }
+    if (x < maiores->xzinho)
+    {
+        maiores->xzinho = x;
+    }
+    if (y > maiores->yzao)
+    {
+        maiores->yzao = y;
+    }
+    if (y < maiores->yzinho)
+    {
+        maiores->yzinho = y;
+    }
 }
 
+void gerarCirculo(TreeNode a)
+{
+    struct node *atual = a;
+    struct circulo *circ;
+    struct numerosSalvos *numeros = malloc(sizeof(struct numerosSalvos));
+    double maiorx, maiory, menorx, menory, centrox, centroy, raio;
+    // O círculo deve conter dentro dele todos os filhos do node
+    // vai achar o maior ponto e o menor ponto dentre os filhos e o elemento
+    percursoSimetricoNode(atual, acharMaiorMenor, numeros);
+    // dai o centro do círculo vai ser metade da soma das coordenadas
+    maiorx = numeros->xzao;
+    maiory = numeros->yzao;
+    menory = numeros->yzinho;
+    menorx = numeros->xzinho;
+    centrox = (maiorx - menorx) / 2;
+    centroy = (maiory - menory) / 2;
+    // raio vai ser metade da distância entre eles
+    raio = sqrt(pow((maiorx - menorx), 2) + pow((maiory - menory), 2)) / 2;
+    atual->circ.x = centrox;
+    atual->circ.y = centroy;
+    atual->circ.raio = raio;
+    // toda vez que um elemento for inserido ou removido o círculo de todos os elementos ancestrais deve ser atualizado
+    // 🤡🤡🤡
+    free(numeros);
+}
 
-// findInRegionCPT, getInfoCPT, getCircCPT, percursoSimetrico, dfs, bfs
+void percursoSimetrico(CPTree b, VisitaNo vf, void *extra)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct arvore *a = b;
+    if (a->raiz != NULL)
+    {
+        percursoSimetricoNode(a->raiz, vf, extra);
+    }
+}
+
+void percursoSimetricoNode(TreeNode a, VisitaNo vf, void *extra)
+{
+    struct node *atual = a;
+    if (atual->esq != NULL)
+    {
+        percursoSimetricoNode(atual->esq, vf, extra);
+    }
+    vf(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+    if (atual->dir != NULL)
+    {
+        percursoSimetricoNode(atual->dir, vf, extra);
+    }
+}
+
+// findInRegionCPT, getInfoCPT, getCircCPT, dfs, bfs
