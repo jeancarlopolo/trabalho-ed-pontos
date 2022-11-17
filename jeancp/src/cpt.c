@@ -390,19 +390,15 @@ void gerarCirculo(TreeNode a)
     struct node *atual = a;
     struct circulo *circ;
     struct numerosSalvos *numeros = malloc(sizeof(struct numerosSalvos));
-    double maiorx, maiory, menorx, menory, centrox, centroy, raio;
+    double centrox, centroy, raio;
     // O círculo deve conter dentro dele todos os filhos do node
     // vai achar o maior ponto e o menor ponto dentre os filhos e o elemento
     percursoSimetricoNode(atual, acharMaiorMenor, numeros);
     // dai o centro do círculo vai ser metade da soma das coordenadas
-    maiorx = numeros->xzao;
-    maiory = numeros->yzao;
-    menory = numeros->yzinho;
-    menorx = numeros->xzinho;
-    centrox = (maiorx - menorx) / 2;
-    centroy = (maiory - menory) / 2;
+    centrox = (numeros->xzao - numeros->xzinho) / 2;
+    centroy = (numeros->yzao - numeros->yzinho) / 2;
     // raio vai ser metade da distância entre eles
-    raio = sqrt(pow((maiorx - menorx), 2) + pow((maiory - menory), 2)) / 2;
+    raio = sqrt(pow((numeros->xzao - numeros->xzinho), 2) + pow((numeros->yzao - numeros->yzinho), 2)) / 2;
     atual->circ.x = centrox;
     atual->circ.y = centroy;
     atual->circ.raio = raio;
@@ -438,4 +434,85 @@ void percursoSimetricoNode(TreeNode a, VisitaNo vf, void *extra)
     }
 }
 
-// findInRegionCPT, getInfoCPT, getCircCPT, dfs, bfs
+Info getInfoCPT(CPTree b, TreeNode n)
+{
+    if (b == NULL)
+    {
+        return NULL;
+    }
+    struct arvore *a = b;
+    if (n == NULL)
+    {
+        return NULL;
+    }
+    struct node *no = n;
+    return no->info;
+}
+
+void getCircCPT(CPTree b, TreeNode n, double *x, double *y, double *r)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct arvore *a = b;
+    if (n == NULL)
+    {
+        return;
+    }
+    struct node *no = n;
+    *x = no->circ.x;
+    *y = no->circ.y;
+    *r = no->circ.raio;
+}
+
+bool findInRegionCPT(CPTree b, double xc, double yc, double r, Lista lres)
+{
+    if (b == NULL)
+    {
+        return false;
+    }
+    struct arvore *a = b;
+    if (a->raiz == NULL)
+    {
+        return false;
+    }
+    struct node *atual = a->raiz;
+    bool achou = false;
+    achou = findInRegionCPTNode(atual, xc, yc, r, lres);
+    return achou;
+}
+
+bool findInRegionCPTNode(TreeNode b, double xc, double yc, double r, Lista lres)
+{
+    struct node *atual = b;
+    bool achou = false;
+    bool dentro = false; // se o círculo do node está dentro da região
+    //distancia dos centros = sqrt((x1 – x2)² + (y1 – y2)²)
+    //se distancia dos centros for menor que a soma dos raios, os círculos se interceptam
+    double distancia = sqrt(pow((atual->circ.x - xc), 2) + pow((atual->circ.y - yc), 2));
+    if (distancia < (atual->circ.raio + r))
+    {
+        dentro = true;
+    }
+    if (atual->esq != NULL && dentro)
+    {
+        achou = findInRegionCPTNode(atual->esq, xc, yc, r, lres);
+    }
+    if (achou == false && dentro)
+    {
+        if (sqrt(pow((atual->x - xc), 2) + pow((atual->y - yc), 2)) <= r)
+        {
+            insert(lres, atual->info);
+            achou = true;
+        }
+    }
+    if (atual->dir != NULL && dentro)
+    {
+        achou = findInRegionCPTNode(atual->dir, xc, yc, r, lres);
+    }
+    return achou;
+}
+
+
+// dfs, bfs
