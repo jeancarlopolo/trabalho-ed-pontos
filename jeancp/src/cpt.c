@@ -407,33 +407,6 @@ void gerarCirculo(TreeNode a)
     free(numeros);
 }
 
-void percursoSimetrico(CPTree b, VisitaNo vf, void *extra)
-{
-    if (b == NULL)
-    {
-        return;
-    }
-    struct arvore *a = b;
-    if (a->raiz != NULL)
-    {
-        percursoSimetricoNode(a->raiz, vf, extra);
-    }
-}
-
-void percursoSimetricoNode(TreeNode a, VisitaNo vf, void *extra)
-{
-    struct node *atual = a;
-    if (atual->esq != NULL)
-    {
-        percursoSimetricoNode(atual->esq, vf, extra);
-    }
-    vf(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
-    if (atual->dir != NULL)
-    {
-        percursoSimetricoNode(atual->dir, vf, extra);
-    }
-}
-
 Info getInfoCPT(CPTree b, TreeNode n)
 {
     if (b == NULL)
@@ -488,8 +461,8 @@ bool findInRegionCPTNode(TreeNode b, double xc, double yc, double r, Lista lres)
     struct node *atual = b;
     bool achou = false;
     bool dentro = false; // se o círculo do node está dentro da região
-    //distancia dos centros = sqrt((x1 – x2)² + (y1 – y2)²)
-    //se distancia dos centros for menor que a soma dos raios, os círculos se interceptam
+    // distancia dos centros = sqrt((x1 – x2)² + (y1 – y2)²)
+    // se distancia dos centros for menor que a soma dos raios, os círculos se interceptam
     double distancia = sqrt(pow((atual->circ.x - xc), 2) + pow((atual->circ.y - yc), 2));
     if (distancia < (atual->circ.raio + r))
     {
@@ -514,5 +487,78 @@ bool findInRegionCPTNode(TreeNode b, double xc, double yc, double r, Lista lres)
     return achou;
 }
 
+void percursoSimetrico(CPTree b, VisitaNo vf, void *extra)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct arvore *a = b;
+    if (a->raiz != NULL)
+    {
+        percursoSimetricoNode(a->raiz, vf, extra);
+    }
+}
 
-// dfs, bfs
+void percursoSimetricoNode(TreeNode a, VisitaNo vf, void *extra)
+{
+    if (a == NULL)
+    {
+        return;
+    }
+    struct node *atual = a;
+    percursoSimetricoNode(atual->esq, vf, extra);
+    vf(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+    percursoSimetricoNode(atual->dir, vf, extra);
+}
+
+void dfs(CPTree b, VisitaNo vf, void *extra)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct arvore *a = b;
+    if (a->raiz != NULL)
+    {
+        dfsNode(a->raiz, vf, extra);
+    }
+}
+
+void dfsNode(TreeNode b, VisitaNo vf, void *extra)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct node *atual = b;
+    vf(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+    dfsNode(atual->esq, vf, extra);
+    dfsNode(atual->dir, vf, extra);
+}
+
+void bfs(CPTree b, VisitaNo vf, void *extra)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct arvore *a = b;
+    if (a->raiz != NULL)
+    {
+        bfsNode(a->raiz, vf, extra);
+    }
+}
+
+void bfsNode(TreeNode b, VisitaNo vf, void *extra)
+{
+    if (b == NULL)
+    {
+        return;
+    }
+    struct node *atual = b;
+    bfsNode(atual->esq, vf, extra);
+    bfsNode(atual->dir, vf, extra);
+    vf(atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio, extra);
+}
+
