@@ -1,5 +1,5 @@
 #include "cpt.h"
-#include "math.h"
+#include <math.h>
 #include "stdbool.h"
 
 struct circulo
@@ -27,7 +27,9 @@ struct numerosSalvos
     double xzao, yzao, xzinho, yzinho;
 };
 
-void acharMaiorMenor(double x, double y, Info info, double xc, double yc, double r, void *extra)
+typedef void *visitante(double x,  double y,  void *extra);
+
+void acharMaiorMenor(double x, double y, void *extra)
 {
     struct numerosSalvos *maiores = extra;
     if (x > maiores->xzao)
@@ -80,7 +82,7 @@ void percursoSimetricoNode(TreeNode a, VisitaNo vf, void *extra)
 void gerarCirculo(TreeNode a)
 {
     struct node *atual = a;
-    struct circulo *circ;
+    //struct circulo *circ;
     struct numerosSalvos *numeros = malloc(sizeof(struct numerosSalvos));
     double centrox, centroy, raio;
     // O círculo deve conter dentro dele todos os filhos do node
@@ -479,7 +481,6 @@ Info getInfoCPT(CPTree b, TreeNode n)
     {
         return NULL;
     }
-    struct arvore *a = b;
     if (n == NULL)
     {
         return NULL;
@@ -494,7 +495,7 @@ void getCircCPT(CPTree b, TreeNode n, double *x, double *y, double *r)
     {
         return;
     }
-    struct arvore *a = b;
+    //struct arvore *a = b;
     if (n == NULL)
     {
         return;
@@ -559,8 +560,14 @@ void printTreeNode(TreeNode b)
         return;
     }
     struct node *atual = b;
+    int *i = (int *) atual->info;
     printTreeNode(atual->esq);
-    printf("x: %lf, y: %lf, info: %d, circ.x: %lf, circ.y: %lf, circ.raio: %lf\n", atual->x, atual->y, atual->info, atual->circ.x, atual->circ.y, atual->circ.raio);
+    printf("\nx: %lf,", atual->x);
+    printf("\ny: %lf", atual->y);
+    printf("\ninfo: %d", *i);
+    printf("\ncirc.x: %lf", atual->circ.x);
+    printf("\ncirc.y: %lf", atual->circ.y);
+    printf("\ncirc.raio: %lf\n", atual->circ.raio);
     printTreeNode(atual->dir);
 }
 
@@ -577,11 +584,11 @@ void printTree(CPTree b)
     }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     CPTree tree;
     tree = createCPT(0.1);
-    Lista lista = createLista(-1);
+    //Lista lista = createLista(-1);
     insertCPT(tree, 0, 0, (Info)1, NULL, NULL, NULL);
     insertCPT(tree, 1, 1, (Info)2, NULL, NULL, NULL);
     insertCPT(tree, 2, 2, (Info)3, NULL, NULL, NULL);
