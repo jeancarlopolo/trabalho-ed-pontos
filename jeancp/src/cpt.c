@@ -1,5 +1,5 @@
 #include "cpt.h"
-#include "math.h"v
+#include "math.h"
 #include "stdbool.h"
 
 struct circulo

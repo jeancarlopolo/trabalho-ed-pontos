@@ -323,6 +323,24 @@ void swap(struct listanode *a, struct listanode *b)
 	a = b;
 	b = temp;
 }
+// função que embaralha a lista
+void shuffle(Lista head)
+{
+	struct lista *pointer = head;
+	struct listanode *current = pointer->l;
+	srand(time(NULL));
+	int i, n = 0;
+	while (current != NULL)
+	{
+		n++;
+		current = current->prox;
+	}
+	for (i = n - 1; i > 0; i--)
+	{
+		int j = rand() % (i + 1);
+		swap(i, j);
+	}
+}
 /* Considers last element as pivot, places the
 pivot element at its correct position in sorted array,
 and places all smaller (smaller than pivot) to left
@@ -343,11 +361,11 @@ struct listanode *partition(struct listanode *l, struct listanode *h)
 			// Similar to i++ for array
 			i = (i == NULL) ? l : i->prox;
 
-			swap(&(i->info), &(j->info));
+			swap(i, j);
 		}
 	}
 	i = (i == NULL) ? l : i->prox; // Similar to i++
-	swap(&i, &h);
+	swap(i, h);
 	return i;
 }
 
@@ -369,26 +387,9 @@ void quickSort(Lista *head)
 	shuffle(head);
 	// Find last node
 	struct listanode *h = getLast(head);
+	struct listanode *l = getFirst(head);
 
 	// Call the recursive QuickSort
-	_quickSort(head, h);
+	_quickSort(l, h);
 }
 
-// função que embaralha a lista
-void shuffle(Lista *head)
-{
-	struct lista *pointer = head;
-	struct listanode *current = pointer->l;
-	srand(time(NULL));
-	int i, n = 0;
-	while (current != NULL)
-	{
-		n++;
-		current = current->prox;
-	}
-	for (i = n - 1; i > 0; i--)
-	{
-		int j = rand() % (i + 1);
-		swap(get(head, i), get(head, j));
-	}
-}

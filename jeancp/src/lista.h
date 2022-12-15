@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "time.h"
 
 /**
 Uma lista e� uma colecao ordenada de itens (ou seja, um elemento possui um antecessor e um sucessor)  em que seus elementos podem
