@@ -1,5 +1,5 @@
 #include "cpt.h"
-#include <math.h>
+#include "math.h"v
 #include "stdbool.h"
 
 struct circulo
@@ -27,9 +27,9 @@ struct numerosSalvos
     double xzao, yzao, xzinho, yzinho;
 };
 
-typedef void *visitante(double x,  double y,  void *extra);
+typedef void (*visitante) (double x,  double y,  void *extra);
 
-void acharMaiorMenor(double x, double y, void *extra)
+void acharMaiorMenor(double x, double y, Info info, double xc, double yc, double r, void *extra)
 {
     struct numerosSalvos *maiores = extra;
     if (x > maiores->xzao)
@@ -81,13 +81,14 @@ void percursoSimetricoNode(TreeNode a, VisitaNo vf, void *extra)
 }
 void gerarCirculo(TreeNode a)
 {
+    VisitaNo funcao =  &acharMaiorMenor;
     struct node *atual = a;
     //struct circulo *circ;
     struct numerosSalvos *numeros = malloc(sizeof(struct numerosSalvos));
     double centrox, centroy, raio;
     // O círculo deve conter dentro dele todos os filhos do node
     // vai achar o maior ponto e o menor ponto dentre os filhos e o elemento
-    percursoSimetricoNode(atual, acharMaiorMenor, numeros);
+    percursoSimetricoNode(atual, funcao, numeros);
     // dai o centro do círculo vai ser metade da soma das coordenadas
     centrox = (numeros->xzao - numeros->xzinho) / 2;
     centroy = (numeros->yzao - numeros->yzinho) / 2;
@@ -525,7 +526,7 @@ bool findInRegionCPTNode(TreeNode b, double xc, double yc, double r, Lista lres)
     {
         if (sqrt(pow((atual->x - xc), 2) + pow((atual->y - yc), 2)) <= r)
         {
-            insert(lres, atual->info);
+            insert(lres, atual->info, 0);
             achou = true;
         }
     }
