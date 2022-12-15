@@ -323,24 +323,39 @@ void swap(struct listanode *a, struct listanode *b)
 	a = b;
 	b = temp;
 }
-// função que embaralha a lista
-void shuffle(Lista head)
+// função que cria um vetor com os elementos da lista, embaralha o vetor e depois recria a lista com os elementos do vetor
+void shuffle(Lista L)
 {
-	struct lista *pointer = head;
-	struct listanode *current = pointer->l;
-	srand(time(NULL));
-	int i, n = 0;
-	while (current != NULL)
+	struct lista *pointer = L;
+	struct listanode *pointernode = pointer->l;
+	int i = 0;
+	int n = length(L);
+	Item *vetor = malloc(n * sizeof(Item));
+	while (pointernode != NIL)
 	{
-		n++;
-		current = current->prox;
+		vetor[i] = pointernode->info;
+		pointernode = pointernode->prox;
+		i++;
 	}
-	for (i = n - 1; i > 0; i--)
+	srand(time(NULL));
+	for (int i = n - 1; i > 0; i--)
 	{
 		int j = rand() % (i + 1);
-		swap(i, j);
+		Item temp = vetor[i];
+		vetor[i] = vetor[j];
+		vetor[j] = temp;
 	}
+	pointernode = pointer->l;
+	i = 0;
+	while (pointernode != NIL)
+	{
+		pointernode->info = vetor[i];
+		pointernode = pointernode->prox;
+		i++;
+	}
+	free(vetor);
 }
+
 /* Considers last element as pivot, places the
 pivot element at its correct position in sorted array,
 and places all smaller (smaller than pivot) to left

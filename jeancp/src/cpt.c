@@ -1,6 +1,6 @@
 #include "cpt.h"
-#include "math.h"
-#include "stdbool.h"
+#include <math.h>
+#include <stdbool.h>
 
 struct circulo
 {
