@@ -44,7 +44,7 @@ bool isFull(Lista L);
 lista e' acrescido de 1 elemento.
 Retorna um indicador para o elemento acrescentado; ou NIL, se a lista estiver
 cheia */
-Posic insert(Lista L, Item info);
+Posic insert(Lista L, Item info, double area);
 
 /** Remove e retorna o primeiro elemento da lista L. A lista nao pode
     estar vazia */

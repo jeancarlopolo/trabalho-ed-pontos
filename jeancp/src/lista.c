@@ -5,6 +5,7 @@ struct listanode
 	Item info;
 	struct listanode *ant;
 	struct listanode *prox;
+	double area;
 };
 
 struct lista
@@ -83,7 +84,7 @@ bool isFull(Lista L)
 	}
 }
 
-Posic insert(Lista L, Item info)
+Posic insert(Lista L, Item info, double area)
 {
 	struct lista *pointer = L;
 	struct listanode *pointernode = pointer->l;
@@ -104,6 +105,7 @@ Posic insert(Lista L, Item info)
 			elemento->prox = NIL;
 			elemento->info = info;
 			elemento->ant = pointernode;
+			elemento->area = area;
 			return elemento;
 		}
 		else
@@ -312,4 +314,81 @@ void killLista(Lista L, removerItem removedor)
 		remover(L, getFirst(L), removedor);
 	}
 	free(L);
+}
+
+/* A utility function to swap two elements */
+void swap(struct listanode *a, struct listanode *b)
+{
+	struct listanode *temp = a;
+	a = b;
+	b = temp;
+}
+/* Considers last element as pivot, places the
+pivot element at its correct position in sorted array,
+and places all smaller (smaller than pivot) to left
+of pivot and all greater elements to right of pivot */
+struct listanode *partition(struct listanode *l, struct listanode *h)
+{
+	// set pivot as h element
+	int area = h->area;
+
+	// similar to i = l-1 for array implementation
+	struct listanode *i = l->ant;
+
+	// Similar to "for (int j = l; j <= h- 1; j++)"
+	for (struct listanode *j = l; j != h; j = j->prox)
+	{
+		if (j->area <= area)
+		{
+			// Similar to i++ for array
+			i = (i == NULL) ? l : i->prox;
+
+			swap(&(i->info), &(j->info));
+		}
+	}
+	i = (i == NULL) ? l : i->prox; // Similar to i++
+	swap(&i, &h);
+	return i;
+}
+
+/* A recursive implementation of quicksort for linked list */
+void _quickSort(struct listanode *l, struct listanode *h)
+{
+	if (h != NULL && l != h && l != h->prox)
+	{
+		struct listanode *p = partition(l, h);
+		_quickSort(l, p->ant);
+		_quickSort(p->prox, h);
+	}
+}
+
+// The main function to sort a linked list.
+// It mainly calls _quickSort()
+void quickSort(Lista *head)
+{
+	shuffle(head);
+	// Find last node
+	struct listanode *h = getLast(head);
+
+	// Call the recursive QuickSort
+	_quickSort(head, h);
+}
+
+// função que embaralha a lista
+void shuffle(Lista *head)
+{
+	struct lista *pointer = head;
+	struct listanode *current = pointer->l;
+	srand(time(NULL));
+	int i, n = 0;
+	while (current != NULL)
+	{
+		n++;
+		current = current->prox;
+	}
+	for (i = n - 1; i > 0; i--)
+	{
+		int j = rand() % (i + 1);
+		swap(get(head, i), get(head, j));
+	}
 }
