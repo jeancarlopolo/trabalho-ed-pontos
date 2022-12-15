@@ -1,9 +1,10 @@
 #include "qry.h"
 #include "path.h"
 
-void qry_read(char *path, char *fileName, Lista *lista, FILE *svg, Lista *listaminas)
+void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *listaminas)
 {
-    Lista listasSelec = createLista(-1);
+    CPTree listasSelec = createLista(-1);
+    VisitaNo funcao = &outrafuncao;
     char type[100];
     double x, y, dx, dy, r, na = 1.0, pontos = 0.0, pontosmax = 0.0;
     int id, j, k, idc, cont = 0;
@@ -19,7 +20,9 @@ void qry_read(char *path, char *fileName, Lista *lista, FILE *svg, Lista *listam
         printf("Erro ao abrir o arquivo %s", fullPath);
         return;
     }
-    elemento = getFirst(lista);
+    elemento = getFirst(arvore);
+    /* trocar isso pela funcao q percorre a arvore */
+    
     while (elemento != NULL)
     {
         barco = get(lista, elemento);

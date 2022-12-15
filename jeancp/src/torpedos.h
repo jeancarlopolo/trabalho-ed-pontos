@@ -17,9 +17,9 @@ são as cores de preenchimento do navio de original e vice versa.
 */
 
 /** Dispara um torpedo nas coordenadas x e y. Retorna a pontuação recebida.*/
-double torpedo(Lista lista, double x, double y, FILE *svg, FILE *textow);
+double torpedo(CPTree arvore, double x, double y, FILE *svg, FILE *textow);
 
 /** Dispara um torpedo replicante nas coordenadas x e y que replica barcos atingidos para as coordenadas x1 e y1. */
-void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, int id, FILE *svg, FILE *textow);
+void torpedo_replicante(CPTree arvore, double x, double y, double x1, double y1, int id, FILE *svg, FILE *textow);
 
 #endif

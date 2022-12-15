@@ -40,7 +40,7 @@ void svg_text(FILE *svg, Barco t);
 void svg_string(FILE *svg, char *string, double x, double y, char *corp, char *corb, char *ancora);
 
 /** recebe um arquivo SVG e uma lista de barcos e desenha os barcos no arquivo SVG */
-void svg_barcos(FILE *svg, Lista barcos);
+void svg_barcos(FILE *svg, CPTree barcos);
 
 /** recebe uma string com o caminho de saída, uma string com o nome do arquivo SVG e uma lista de formas e cria um arquivo SVG */
 FILE *svg_write(char *pathOut, char *name);

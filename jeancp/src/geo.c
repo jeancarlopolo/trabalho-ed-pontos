@@ -6,7 +6,7 @@
 #include "barco.h"
 #include "mina.h"
 
-void geo_read(char *path, char *fileName, Lista *lista, Lista *listaminas)
+void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvore)
 {
     char type[200];
     double x, y, w, h, r;
@@ -34,14 +34,14 @@ void geo_read(char *path, char *fileName, Lista *lista, Lista *listaminas)
         {
             fscanf(geo, "%d %lf %lf %lf %s %s", &id, &x, &y, &r, corb, corp);
             Barco *circle = create_barco('c', create_circulo(id, x, y, r, corb, corp));
-            insert(lista, circle);
+            insert(arvore, circle);
             break;
         }
         case 'r':
         {
             fscanf(geo, "%d %lf %lf %lf %lf %s %s", &id, &x, &y, &w, &h, corb, corp);
             Barco *retan = create_barco('r', create_retangulo(id, x, y, w, h, corb, corp));
-            insert(lista, retan);
+            insert(arvore, retan);
             break;
         }
         case 't':
@@ -52,12 +52,12 @@ void geo_read(char *path, char *fileName, Lista *lista, Lista *listaminas)
             if (strcmp(text, "#") == 0)
             {
                 txt = createMina(id, x, y, corb, corp, ancora);
-                insert(listaminas, txt);
+                insert(arvore, txt);
             }
             else
             {
                 txt = create_barco('t', create_texto(id, x, y, corb, corp, text, ancora));
-                insert(lista, txt);
+                insert(arvore, txt);
             }
             break;
         }
@@ -65,7 +65,7 @@ void geo_read(char *path, char *fileName, Lista *lista, Lista *listaminas)
         {
             fscanf(geo, "%d %lf %lf %lf %lf %s", &id, &x, &y, &w, &h, corb);
             Barco *linha = create_barco('l', create_linha(id, x, y, w, h, corb));
-            insert(lista, linha);
+            insert(arvore, linha);
             break;
         };
         default:

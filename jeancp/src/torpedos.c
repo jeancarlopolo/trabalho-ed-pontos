@@ -1,18 +1,18 @@
 #include "torpedos.h"
 
-double torpedo(Lista lista, double x, double y, FILE *svg, FILE *textow)
+double torpedo(CPTree arvore, double x, double y, FILE *svg, FILE *textow)
 {
     int i = 0, hp;
     double x1, y1, x2, y2, raio, w, h, pontos = 0;
-    Posic elemento = getFirst(lista);
+    Posic elemento = getFirst(arvore);
     Posic aux = elemento;
-    Barco *barco = get(lista, elemento);
+    Barco *barco = get(arvore, elemento);
     bool destruido = false;
     char asterisco[10];
     while (elemento != NULL)
     {
         destruido = false;
-        barco = get(lista, elemento);
+        barco = get(arvore, elemento);
         switch (barco_get_tipo(barco))
         {
         case 'c':
@@ -104,12 +104,12 @@ double torpedo(Lista lista, double x, double y, FILE *svg, FILE *textow)
             pontos += barco_get_point_destr(barco);
             fprintf(textow, "Pontos recebidos: %lf \nPontos totais: %lf\n\n", barco_get_point_destr(barco), pontos);
             aux = elemento;
-            elemento = getNext(lista, elemento);
-            remover(lista, aux);
+            elemento = getNext(arvore, elemento);
+            remover(arvore, aux);
         }
         else
         {
-            elemento = getNext(lista, elemento);
+            elemento = getNext(arvore, elemento);
         }
     }
     if (i > 0)
@@ -125,16 +125,16 @@ double torpedo(Lista lista, double x, double y, FILE *svg, FILE *textow)
     return pontos;
 }
 
-void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, int id, FILE *svg, FILE *textow)
+void torpedo_replicante(CPTree arvore, double x, double y, double x1, double y1, int id, FILE *svg, FILE *textow)
 {
     int contador = 0;
     double x2, y2, x3, y3, raio, w, h;
-    Posic elemento = getFirst(lista);
+    Posic elemento = getFirst(arvore);
     Barco *barco;
     char *corb, *corp, *texto, *ancora;
     while (elemento != NULL)
     {
-        barco = get(lista, elemento);
+        barco = get(arvore, elemento);
         switch (barco_get_tipo(barco))
         {
         case 'c':
@@ -147,7 +147,7 @@ void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, i
                 corb = circulo_get_corb(barco_get_info(barco));
                 corp = circulo_get_corp(barco_get_info(barco));
                 Barco *circle = create_barco('c', create_circulo(id + contador, x2 + x1, y2 + y1, raio, corp, corb));
-                insert(lista, circle);
+                insert(arvore, circle);
                 fprintf(textow, "\nTorpedo replicante: círculo \nid: %d \nraio: %lf \ncor da borda: %s \ncor de preenchimento: %s \nX: %lf \nY: %lf \n", circulo_get_i(barco_get_info(barco)), circulo_get_r(barco_get_info(barco)), circulo_get_corb(barco_get_info(barco)), circulo_get_corp(barco_get_info(barco)), circulo_get_x(barco_get_info(barco)), circulo_get_y(barco_get_info(barco)));
                 fprintf(textow, "\nCópia: círculo \nid: %d \nraio: %lf \ncor da borda: %s \ncor de preenchimento: %s \nX: %lf \nY: %lf \n", circulo_get_i(barco_get_info(circle)), circulo_get_r(barco_get_info(circle)), circulo_get_corb(barco_get_info(circle)), circulo_get_corp(barco_get_info(circle)), circulo_get_x(barco_get_info(circle)), circulo_get_y(barco_get_info(circle)));
             }
@@ -163,7 +163,7 @@ void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, i
                 corb = retangulo_get_corb(barco_get_info(barco));
                 corp = retangulo_get_corp(barco_get_info(barco));
                 Barco *rectangle = create_barco('r', create_retangulo(id + contador, x2 + x1, y2 + y1, w, h, corp, corb));
-                insert(lista, rectangle);
+                insert(arvore, rectangle);
                 fprintf(textow, "\nTorpedo replicante: retângulo \nid: %d \naltura: %lf \nlargura: %lf \ncor da borda: %s \ncor de preenchimento: %s \nX: %lf \nY: %lf \n", retangulo_get_i(barco_get_info(barco)), retangulo_get_h(barco_get_info(barco)), retangulo_get_w(barco_get_info(barco)), retangulo_get_corb(barco_get_info(barco)), retangulo_get_corp(barco_get_info(barco)), retangulo_get_x(barco_get_info(barco)), retangulo_get_y(barco_get_info(barco)));
                 fprintf(textow, "\nCópia: retangulo \nid: %d \naltura: %lf \nlargura: %lf \ncor da borda: %s \ncor de preenchimento: %s \nX: %lf \nY: %lf \n", retangulo_get_i(barco_get_info(rectangle)), retangulo_get_h(barco_get_info(rectangle)), retangulo_get_w(barco_get_info(rectangle)), retangulo_get_corb(barco_get_info(rectangle)), retangulo_get_corp(barco_get_info(rectangle)), retangulo_get_x(barco_get_info(rectangle)), retangulo_get_y(barco_get_info(rectangle)));
             }
@@ -179,7 +179,7 @@ void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, i
                 texto = texto_get_conteudo(barco_get_info(barco));
                 ancora = texto_get_ancora(barco_get_info(barco));
                 Barco *text = create_barco('t', create_texto(id + contador, x2 + x1, y2 + y1, corp, corb, texto, ancora));
-                insert(lista, text);
+                insert(arvore, text);
                 fprintf(textow, "\nTorpedo replicante: texto \nid: %d \nconteúdo: %scor da borda: %s \ncor de preenchimento: %s \nX: %lf \nY: %lf \n", texto_get_i(barco_get_info(barco)), texto_get_conteudo(barco_get_info(barco)), texto_get_corb(barco_get_info(barco)), texto_get_corp(barco_get_info(barco)), texto_get_x(barco_get_info(barco)), texto_get_y(barco_get_info(barco)));
                 fprintf(textow, "\nCópia: texto \nid: %d \nconteúdo: %scor da borda: %s \ncor de preenchimento: %s \nX: %lf \nY: %lf \n", texto_get_i(barco_get_info(text)), texto_get_conteudo(barco_get_info(text)), texto_get_corb(barco_get_info(text)), texto_get_corp(barco_get_info(text)), texto_get_x(barco_get_info(text)), texto_get_y(barco_get_info(text)));
             }
@@ -194,7 +194,7 @@ void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, i
                 contador++;
                 corb = linha_get_cor(barco_get_info(barco));
                 Barco *line = create_barco('l', create_linha(id + contador, x2 + x1, y2 + y1, x3 + x1, y3 + y1, corb));
-                insert(lista, line);
+                insert(arvore, line);
                 fprintf(textow, "\nTorpedo replicante: linha \nid: %d \ncor: %s \nX1: %lf \nY1: %lf \nX2: %lf \nY2: %lf \n", linha_get_i(barco_get_info(barco)), linha_get_cor(barco_get_info(barco)), linha_get_x1(barco_get_info(barco)), linha_get_y1(barco_get_info(barco)), linha_get_x2(barco_get_info(barco)), linha_get_y2(barco_get_info(barco)));
                 fprintf(textow, "\nCópia: linha \nid: %d \ncor: %s \nX1: %lf \nY1: %lf \nX2: %lf \nY2: %lf \n", linha_get_i(barco_get_info(line)), linha_get_cor(barco_get_info(line)), linha_get_x1(barco_get_info(line)), linha_get_y1(barco_get_info(line)), linha_get_x2(barco_get_info(line)), linha_get_y2(barco_get_info(line)));
             }
@@ -202,7 +202,7 @@ void torpedo_replicante(Lista lista, double x, double y, double x1, double y1, i
         default:
             break;
         }
-        elemento = getNext(lista, elemento);
+        elemento = getNext(arvore, elemento);
     }
     svg_string(svg, "@", x, y, "red", "red", "middle");
 }

@@ -9,7 +9,7 @@ double calcular_reducao(double area, double r, double na)
     return reducao;
 }
 
-double bomba_rad(Lista *l, double x, double y, double r, double na, FILE *svg, FILE *textow)
+double bomba_rad(CPTree *l, double x, double y, double r, double na, FILE *svg, FILE *textow)
 {
     double np;
     double x1, y1, x2, y2, raio, w, h, pontos = 0, area, comprimento;

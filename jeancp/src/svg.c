@@ -103,7 +103,7 @@ void svg_string(FILE *svg, char *string, double x, double y, char *corp, char *c
     fprintf(svg, "\n\t<text font-size=\"5\" x=\"%lf\" y=\"%lf\" fill=\"%s\" stroke=\"%s\" text-anchor=\"%s\">%s</text>", x, y, corp, corb, ancora, string);
 }
 
-void svg_barcos(FILE *svg, Lista barcos)
+void svg_barcos(FILE *svg, CPTree barcos)
 {
     Posic aux = getFirst(barcos);
     while (aux != NULL)
