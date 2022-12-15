@@ -584,18 +584,3 @@ void printTree(CPTree b)
         printTreeNode(a->raiz);
     }
 }
-
-int main()
-{
-    CPTree tree;
-    tree = createCPT(0.1);
-    //Lista lista = createLista(-1);
-    insertCPT(tree, 0, 0, (Info)1, NULL, NULL, NULL);
-    insertCPT(tree, 1, 1, (Info)2, NULL, NULL, NULL);
-    insertCPT(tree, 2, 2, (Info)3, NULL, NULL, NULL);
-    insertCPT(tree, 1, 3, (Info)4, NULL, NULL, NULL);
-    insertCPT(tree, 2, 4, (Info)5, NULL, NULL, NULL);
-    insertCPT(tree, 5, 5, (Info)6, NULL, NULL, NULL);
-    printTree(tree);
-    return 0;
-}

@@ -198,7 +198,7 @@ double barco_get_point_destr(Barco b)
     return pt;
 }
 
-void barco_kill(Barco b)
+void barco_kill(Item b)
 {
     switch (barco_get_tipo(b))
     {

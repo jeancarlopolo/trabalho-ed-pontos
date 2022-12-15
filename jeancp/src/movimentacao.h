@@ -8,13 +8,12 @@
 #include "barco.h"
 #include "math.h"
 #include "svg.h"
-#include "cpt.h"
 
 /** move_barco move os barcos de acordo com o comando mv*/
-double move_barco(CPTree barcosSelec, double x, double y, CPTree *arvore, CPTree *arvore, FILE *svg, int j, int k, FILE *textow);
+double move_barco(CPTree barcosSelec, double x, double y, CPTree *arvore, CPTree *arvoreminas, FILE *svg, int j, int k, FILE *textow);
 
 /** passou_mina verifica se o barco passou por uma mina*/
-bool passou_mina(Barco b, double x, double y, CPTree *arvore, CPTree *arvore, FILE *svg, CPTree *listaSelec, FILE *textow);
+bool passou_mina(Barco b, double x, double y, CPTree *arvore, CPTree *arvoreminas, FILE *svg, CPTree *listaSelec, FILE *textow);
 
 /** move_retangulo move o retângulo de acordo com o comando mv*/
 void move_retangulo(Barco b, double x, double y);

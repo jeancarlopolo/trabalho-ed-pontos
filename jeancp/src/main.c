@@ -26,18 +26,16 @@ int main(int argc, char *argv[])
             normalizePath(argv[i + 1], dir, strlen(argv[i + 1]));
         }
     }
-    Lista listabarcos = createLista(-1);
-    Lista listaminas = createLista(-1);
-    geo_read(path, arqGeo, listabarcos, listaminas);
+    CPTree arvorebarcos = createCPT(0.0001);
+    CPTree arvoreminas = createCPT(0.0001);
+    geo_read(path, arqGeo, arvorebarcos, arvoreminas);
     FILE *svg = svg_write(dir, arqGeo);
     if (arqQry != NULL)
     {
-        qry_read(path, arqQry, listabarcos, svg, listaminas);
+        qry_read(path, arqQry, arvorebarcos, svg, arvoreminas);
     }
-    svg_barcos(svg, listabarcos);
+    svg_barcos(svg, arvorebarcos);
     svg_end(svg);
-    killLista(listabarcos);
-    killLista(listaminas);
     free(arqQry);
     free(arqGeo);
     free(dir);

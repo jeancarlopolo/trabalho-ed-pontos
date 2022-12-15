@@ -6,7 +6,7 @@
 #include "barco.h"
 #include "mina.h"
 
-void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvore)
+void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvoremina)
 {
     char type[200];
     double x, y, w, h, r;
@@ -34,14 +34,14 @@ void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvore)
         {
             fscanf(geo, "%d %lf %lf %lf %s %s", &id, &x, &y, &r, corb, corp);
             Barco *circle = create_barco('c', create_circulo(id, x, y, r, corb, corp));
-            insert(arvore, circle);
+            insertCPT(arvore, circulo_get_x(circle), circulo_get_y(circle), circle, NULL, NULL, NULL);
             break;
         }
         case 'r':
         {
             fscanf(geo, "%d %lf %lf %lf %lf %s %s", &id, &x, &y, &w, &h, corb, corp);
             Barco *retan = create_barco('r', create_retangulo(id, x, y, w, h, corb, corp));
-            insert(arvore, retan);
+            insertCPT(arvore, retangulo_get_x(retan), retangulo_get_y(retan), retan, NULL, NULL, NULL);
             break;
         }
         case 't':
@@ -52,12 +52,12 @@ void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvore)
             if (strcmp(text, "#") == 0)
             {
                 txt = createMina(id, x, y, corb, corp, ancora);
-                insert(arvore, txt);
+                insertCPT(arvoremina, x, y, txt, NULL, NULL, NULL);
             }
             else
             {
                 txt = create_barco('t', create_texto(id, x, y, corb, corp, text, ancora));
-                insert(arvore, txt);
+                insertCPT(arvore, texto_get_x(txt), texto_get_y(txt), txt, NULL, NULL, NULL);
             }
             break;
         }
@@ -65,7 +65,7 @@ void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvore)
         {
             fscanf(geo, "%d %lf %lf %lf %lf %s", &id, &x, &y, &w, &h, corb);
             Barco *linha = create_barco('l', create_linha(id, x, y, w, h, corb));
-            insert(arvore, linha);
+            insertCPT(arvore, (linha_get_x1(linha) + linha_get_x2(linha)) / 2, (linha_get_y1(linha) + linha_get_y2(linha)) / 2, linha, NULL, NULL, NULL);
             break;
         };
         default:

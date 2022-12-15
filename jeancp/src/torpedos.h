@@ -5,6 +5,7 @@
 #include "barco.h"
 #include "math.h"
 #include "svg.h"
+#include "cpt.h"
 
 /**
 O torpedo é um tipo de ataque que pode ser disparado contra um navio. Ele reduz a vida do navio em

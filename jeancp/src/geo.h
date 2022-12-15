@@ -5,6 +5,6 @@
 #include "lista.h"
 
 /** geo_read recebe o caminho do arquivo geo e o nome do arquivo geo e uma lista* e adiciona os elementos do arquivo geo na lista */
-void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvore);
+void geo_read(char *path, char *fileName, CPTree *arvore, CPTree *arvoremina);
 
 #endif

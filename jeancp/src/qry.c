@@ -1,7 +1,7 @@
 #include "qry.h"
 #include "path.h"
 
-void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *listaminas)
+void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvoreminas)
 {
     CPTree listasSelec = createLista(-1);
     VisitaNo funcao = &outrafuncao;
@@ -99,13 +99,13 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *list
             {
                 fscanf(qry, "%d %d %lf", &j, &k, &x);
                 fprintf(textow, " %d %d %lf\n", j, k, x);
-                pontos += move_barco(listasSelec, x, 0, listaminas, lista, svg, j, k, textow);
+                pontos += move_barco(listasSelec, x, 0, arvoreminas, lista, svg, j, k, textow);
             }
             else if (type[2] == 'v')
             {
                 fscanf(qry, "%d %d %lf", &j, &k, &y);
                 fprintf(textow, " %d %d %lf\n", j, k, y);
-                pontos += move_barco(listasSelec, 0, y, listaminas, lista, svg, j, k, textow);
+                pontos += move_barco(listasSelec, 0, y, arvoreminas, lista, svg, j, k, textow);
             }
         }
         else if (type[0] == 's' && type[1] == 'e')

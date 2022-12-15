@@ -13,7 +13,10 @@ double bomba_rad(CPTree *l, double x, double y, double r, double na, FILE *svg, 
 {
     double np;
     double x1, y1, x2, y2, raio, w, h, pontos = 0, area, comprimento;
-    Posic elemento = getFirst(l);
+    Lista lres = createLista(-1);
+    findInRegionCPT(l, x, y, r, lres);
+    Posic elemento = getFirst(lres);
+    VisitaNo removedor = &barco_kill;
     Posic aux = elemento;
     Barco *barco = get(l, elemento);
     bool desativado = false;
@@ -119,7 +122,7 @@ double bomba_rad(CPTree *l, double x, double y, double r, double na, FILE *svg, 
             fprintf(textow, "Pontos recebidos: %lf \nPontos totais: %lf\n\n", barco_get_point_desat(barco), pontos);
             aux = elemento;
             elemento = getNext(l, elemento);
-            remover(l, aux);
+            remover(l, aux, removedor);
         }
         else
         {
