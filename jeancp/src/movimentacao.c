@@ -1,19 +1,5 @@
 #include "movimentacao.h"
 
-struct informacoes
-{
-    FILE *svg;
-    FILE *textow;
-    double xmina, ymina, x, y;
-};
-
-struct maisinformacoes
-{
-    struct informacoes *info;
-    CPTree arvorebarcos;
-    VisitaNo funcao;
-};
-
 void move_retangulo(Barco b, double x, double y)
 {
     retangulo r = barco_get_info(b);
@@ -44,13 +30,13 @@ void move_linha(Barco b, double x, double y)
     linha_set_y2(l, y);
 }
 
-double move_barco(CPTree barcosSelec, double x, double y, CPTree *arvore, CPTree *arvoreminas, FILE *svg, int j, int k, FILE *textow)
+double move_barco(Lista barcosSelec, double x, double y, Lista *listaminas, Lista *lista, FILE *svg, int j, int k, FILE *textow)
 {
     Barco *b = escolher_barco(barcosSelec, j, k);
     double xfinal, yfinal, pontos = 0;
     xfinal = x + barco_get_x(b);
     yfinal = y + barco_get_x(b);
-    if (!passou_mina(barcosSelec, x, y, arvore, arvoreminas, svg, barcosSelec, textow))
+    if (!passou_mina(barcosSelec, x, y, listaminas, lista, svg, barcosSelec, textow))
     {
         switch (barco_get_tipo(barcosSelec))
         {
@@ -79,17 +65,283 @@ double move_barco(CPTree barcosSelec, double x, double y, CPTree *arvore, CPTree
     return pontos;
 }
 
-bool passou_mina(Barco b, double xend, double yend, CPTree *arvore, CPTree *arvoreminas, FILE *svg, Lista *arvoreSelec, FILE *textow)
+bool passou_mina(Barco b, double xend, double yend, Lista *listaminas, Lista *lista, FILE *svg, Lista *listaSelec, FILE *textow)
 {
-    struct informacoes coisas;
-    coisas.svg = svg;
-    coisas.textow = textow;
-    struct maisinformacoes* maiscoisas = malloc(sizeof(struct maisinformacoes));
-    maiscoisas->info = &coisas;
-    maiscoisas->arvorebarcos = arvore;
-    maiscoisas->funcao = &checar;
-    VisitaNo checkmina = &checarmina;
-    percursoSimetrico(*arvoreminas, checkmina, maiscoisas);
+
+    Posic elemento = getFirst(listaminas);
+    double xmina, ymina, raio, x, y, w, h;
+    VisitaNo removedor = &barco_kill;
+    switch (barco_get_tipo(b))
+    {
+    case 'c':
+        xmina = getMinaX(barco_get_info(elemento));
+        ymina = getMinaY(barco_get_info(elemento));
+        raio = circulo_get_r(barco_get_info(b));
+        x = circulo_get_x(barco_get_info(b));
+        y = circulo_get_y(barco_get_info(b));
+        while (elemento != NULL)
+        {
+            if (xend == x)
+            {
+                if (yend < y)
+                {
+                    if (yend - raio <= ymina && ymina <= y + raio && x - raio <= xmina && xmina <= x + raio)
+                    {
+                        fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (y - raio <= ymina && ymina <= yend + raio && x - raio <= xmina && xmina <= x + raio)
+                    {
+                        fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (xend < x)
+                {
+                    if (xend - raio <= xmina && xmina <= x + raio && y - raio <= ymina && ymina <= y + raio)
+                    {
+                        fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (x - raio <= xmina && xmina <= xend + raio && y - raio <= ymina && ymina <= y + raio)
+                    {
+                        fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            elemento = getNext(listaminas, elemento);
+        }
+        break;
+
+    case 'r':
+        xmina = getMinaX(barco_get_info(elemento));
+        ymina = getMinaY(barco_get_info(elemento));
+        w = retangulo_get_w(barco_get_info(b));
+        h = retangulo_get_h(barco_get_info(b));
+        x = retangulo_get_x(barco_get_info(b));
+        y = retangulo_get_y(barco_get_info(b));
+        while (elemento != NULL)
+        {
+            if (xend == x)
+            {
+                if (yend < y)
+                {
+                    if (yend - h <= ymina && ymina <= y + h && x - w <= xmina && xmina <= x + w)
+                    {
+                        fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (y - h <= ymina && ymina <= yend + h && x - w <= xmina && xmina <= x + w)
+                    {
+                        fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (xend < x)
+                {
+                    if (xend - w <= xmina && xmina <= x + w && y - h <= ymina && ymina <= y + h)
+                    {
+                        fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (x - w <= xmina && xmina <= xend + w && y - h <= ymina && ymina <= y + h)
+                    {
+                        fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            elemento = getNext(listaminas, elemento);
+
+        }
+        break;
+
+    case 't':
+        xmina = getMinaX(barco_get_info(elemento));
+        ymina = getMinaY(barco_get_info(elemento));
+        x = texto_get_x(barco_get_info(b));
+        y = texto_get_y(barco_get_info(b));
+        while (elemento != NULL)
+        {
+            if (xend == x)
+            {
+                if (yend < y)
+                {
+                    if (yend <= ymina && ymina <= y && x <= xmina && xmina <= x)
+                    {
+                        fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (y <= ymina && ymina <= yend && x <= xmina && xmina <= x)
+                    {
+                        fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (xend < x)
+                {
+                    if (xend <= xmina && xmina <= x && y <= ymina && ymina <= y)
+                    {
+                        fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (x <= xmina && xmina <= xend && y <= ymina && ymina <= y)
+                    {
+                        fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            elemento = getNext(listaminas, elemento);
+        }
+        break;
+
+    case 'l':
+        xmina = getMinaX(barco_get_info(elemento));
+        ymina = getMinaY(barco_get_info(elemento));
+        w = fabs(linha_get_x1(barco_get_info(b)) - linha_get_x2(barco_get_info(b)));
+        h = fabs(linha_get_y1(barco_get_info(b)) - linha_get_y2(barco_get_info(b)));
+        x = barco_get_x(b);
+        y = barco_get_y(b);
+        while (elemento != NULL)
+        {
+            if (xend == x)
+            {
+                if (yend < y)
+                {
+                    if (yend - h <= ymina && ymina <= y + h && x - w <= xmina && xmina <= x + w)
+                    {
+                        fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (y - h <= ymina && ymina <= yend + h && x - w <= xmina && xmina <= x + w)
+                    {
+                        fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (xend < x)
+                {
+                    if (xend - w <= xmina && xmina <= x + w && y - h <= ymina && ymina <= y + h)
+                    {
+                        fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (x - w <= xmina && xmina <= xend + w && y - h <= ymina && ymina <= y + h)
+                    {
+                        fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
+                        remover(listaSelec, b, removedor);
+                        svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
+                        killMina(elemento);
+                        remover(lista, b, removedor);
+                        return true;
+                    }
+                }
+            }
+            elemento = getNext(listaminas, elemento);
+        }
+        break;
+
+    default:
+        break;
+    }
     return false;
 }
 
@@ -134,279 +386,4 @@ Barco escolher_barco(Lista barcosSelec, int j, int k)
         }
     }
     return barcoSelecionado;
-}
-
-void checar(double x, double y, Info info, double xc, double yc, double r, void *extra)
-{
-    Barco b = info;
-    double xmina, ymina, raio, x, y, w, h;
-    VisitaNo removedor = &barco_kill;
-    switch (barco_get_tipo(b))
-    {
-    case 'c':
-        xmina = getMinaX(barco_get_info(elemento));
-        ymina = getMinaY(barco_get_info(elemento));
-        raio = circulo_get_r(barco_get_info(b));
-        x = circulo_get_x(barco_get_info(b));
-        y = circulo_get_y(barco_get_info(b));
-        if (xend == x)
-        {
-            if (yend < y)
-            {
-                if (yend - raio <= ymina && ymina <= y + raio && x - raio <= xmina && xmina <= x + raio)
-                {
-                    fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (y - raio <= ymina && ymina <= yend + raio && x - raio <= xmina && xmina <= x + raio)
-                {
-                    fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            if (xend < x)
-            {
-                if (xend - raio <= xmina && xmina <= x + raio && y - raio <= ymina && ymina <= y + raio)
-                {
-                    fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (x - raio <= xmina && xmina <= xend + raio && y - raio <= ymina && ymina <= y + raio)
-                {
-                    fprintf(textow, "circulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", circulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-        break;
-
-    case 'r':
-        xmina = getMinaX(barco_get_info(elemento));
-        ymina = getMinaY(barco_get_info(elemento));
-        w = retangulo_get_w(barco_get_info(b));
-        h = retangulo_get_h(barco_get_info(b));
-        x = retangulo_get_x(barco_get_info(b));
-        y = retangulo_get_y(barco_get_info(b));
-
-        if (xend == x)
-        {
-            if (yend < y)
-            {
-                if (yend - h <= ymina && ymina <= y + h && x - w <= xmina && xmina <= x + w)
-                {
-                    fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (y - h <= ymina && ymina <= yend + h && x - w <= xmina && xmina <= x + w)
-                {
-                    fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            if (xend < x)
-            {
-                if (xend - w <= xmina && xmina <= x + w && y - h <= ymina && ymina <= y + h)
-                {
-                    fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (x - w <= xmina && xmina <= xend + w && y - h <= ymina && ymina <= y + h)
-                {
-                    fprintf(textow, "retangulo(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", retangulo_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-
-        break;
-
-    case 't':
-        xmina = getMinaX(barco_get_info(elemento));
-        ymina = getMinaY(barco_get_info(elemento));
-        x = texto_get_x(barco_get_info(b));
-        y = texto_get_y(barco_get_info(b));
-
-        if (xend == x)
-        {
-            if (yend < y)
-            {
-                if (yend <= ymina && ymina <= y && x <= xmina && xmina <= x)
-                {
-                    fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (y <= ymina && ymina <= yend && x <= xmina && xmina <= x)
-                {
-                    fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            if (xend < x)
-            {
-                if (xend <= xmina && xmina <= x && y <= ymina && ymina <= y)
-                {
-                    fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (x <= xmina && xmina <= xend && y <= ymina && ymina <= y)
-                {
-                    fprintf(textow, "texto(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", texto_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-
-        break;
-
-    case 'l':
-        xmina = getMinaX(barco_get_info(elemento));
-        ymina = getMinaY(barco_get_info(elemento));
-        w = fabs(linha_get_x1(barco_get_info(b)) - linha_get_x2(barco_get_info(b)));
-        h = fabs(linha_get_y1(barco_get_info(b)) - linha_get_y2(barco_get_info(b)));
-        x = barco_get_x(b);
-        y = barco_get_y(b);
-
-        if (xend == x)
-        {
-            if (yend < y)
-            {
-                if (yend - h <= ymina && ymina <= y + h && x - w <= xmina && xmina <= x + w)
-                {
-                    fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (y - h <= ymina && ymina <= yend + h && x - w <= xmina && xmina <= x + w)
-                {
-                    fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            if (xend < x)
-            {
-                if (xend - w <= xmina && xmina <= x + w && y - h <= ymina && ymina <= y + h)
-                {
-                    fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-            else
-            {
-                if (x - w <= xmina && xmina <= xend + w && y - h <= ymina && ymina <= y + h)
-                {
-                    fprintf(textow, "linha(id: %d) passou por uma mina em: \nX: %lf \nY: %lf\n", linha_get_i(barco_get_info(b)), xmina, ymina);
-                    remover(arvoreSelec, b);
-                    svg_string(svg, "&", xmina, ymina, "red", "red", "middle");
-                    killMina(elemento);
-                    remover(arvore, b);
-                    return true;
-                }
-            }
-        }
-
-        break;
-
-    default:
-        break;
-    }
-}
-
-void checarmina(double x, double y, Info info, double xc, double yc, double r, void *extra)
-{
-    struct maisinformacoes *dados = extra;
-    dados->info->xmina = x;
-    dados->info->ymina = y;
-    percursoSimetrico(dados->arvorebarcos, dados->funcao, dados->info);
 }
