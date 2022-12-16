@@ -1,10 +1,61 @@
 #include "qry.h"
 #include "path.h"
 
+struct dados
+{
+    double *pontosmax;
+};
+
+void checar_pontos(double x, double y, Info info, double xc, double yc, double r, void *extra)
+{
+    struct dados *dados = extra;
+    Barco barco = info;
+    double *pontos = dados->pontosmax;
+    switch (barco_get_tipo(barco))
+    {
+    case 'r':
+        if (barco_get_point_desat(barco) > barco_get_point_destr(barco))
+        {
+            *pontos += barco_get_point_desat(barco);
+        }
+        else
+        {
+            *pontos += barco_get_point_destr(barco);
+        }
+        break;
+    case 'c':
+        if (barco_get_point_desat(barco) > barco_get_point_destr(barco))
+        {
+            *pontos += barco_get_point_desat(barco);
+        }
+        else
+        {
+            *pontos += barco_get_point_destr(barco);
+        }
+        break;
+    case 't':
+        *pontos += barco_get_point_destr(barco);
+        break;
+    case 'l':
+        *pontos += barco_get_point_destr(barco);
+        break;
+    default:
+        break;
+    }
+}
+
+double calcular_pontos(CPTree *arvore)
+{
+    double pontosmax = 0;
+    struct dados *pontos = malloc(sizeof(struct dados));
+    pontos->pontosmax = &pontosmax;
+    dfs(arvore, checar_pontos, pontos);
+    return pontosmax;
+}
+
 void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvoreminas)
 {
     CPTree listasSelec = createLista(-1);
-    VisitaNo funcao = &outrafuncao;
     char type[100];
     double x, y, dx, dy, r, na = 1.0, pontos = 0.0, pontosmax = 0.0;
     int id, j, k, idc, cont = 0;
@@ -22,43 +73,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
     }
     elemento = getFirst(arvore);
     /* trocar isso pela funcao q percorre a arvore */
-    
-    while (elemento != NULL)
-    {
-        barco = get(lista, elemento);
-        switch (barco_get_tipo(barco))
-        {
-        case 'r':
-            if (barco_get_point_desat(barco) > barco_get_point_destr(barco))
-            {
-                pontosmax += barco_get_point_desat(barco);
-            }
-            else
-            {
-                pontosmax += barco_get_point_destr(barco);
-            }
-            break;
-        case 'c':
-            if (barco_get_point_desat(barco) > barco_get_point_destr(barco))
-            {
-                pontosmax += barco_get_point_desat(barco);
-            }
-            else
-            {
-                pontosmax += barco_get_point_destr(barco);
-            }
-            break;
-        case 't':
-            pontosmax += barco_get_point_destr(barco);
-            break;
-        case 'l':
-            pontosmax += barco_get_point_destr(barco);
-            break;
-        default:
-            break;
-        }
-        elemento = getNext(lista, elemento);
-    }
+    pontosmax = calcular_pontos(arvore);
     while (true)
     {
         fscanf(qry, "%s", type);
@@ -78,20 +93,20 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
             {
                 fscanf(qry, "%lf %lf", &x, &y);
                 fprintf(textow, " %lf %lf\n", x, y);
-                pontos += torpedo(lista, x, y, svg, textow);
+                pontos += torpedo(arvore, x, y, svg, textow);
             }
             else if (type[1] == 'r')
             {
                 fscanf(qry, "%lf %lf %lf %lf %d", &x, &y, &dx, &dy, &id);
                 fprintf(textow, " %lf %lf %lf %lf %d\n", x, y, dx, dy, id);
-                torpedo_replicante(lista, x, y, dx, dy, id, svg, textow);
+                torpedo_replicante(arvore, x, y, dx, dy, id, svg, textow);
             }
         }
         else if (type[0] == 'b' && type[1] == 'e')
         {
             fscanf(qry, "%lf %lf %lf", &x, &y, &r);
             fprintf(textow, " %lf %lf %lf\n", x, y, r);
-            pontos += bomba_rad(lista, x, y, r, na, svg, textow);
+            pontos += bomba_rad(arvore, x, y, r, na, svg, textow);
         }
         else if (type[0] == 'm' && type[1] == 'v')
         {
@@ -99,13 +114,13 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
             {
                 fscanf(qry, "%d %d %lf", &j, &k, &x);
                 fprintf(textow, " %d %d %lf\n", j, k, x);
-                pontos += move_barco(listasSelec, x, 0, arvoreminas, lista, svg, j, k, textow);
+                pontos += move_barco(listasSelec, x, 0, arvoreminas, arvore, svg, j, k, textow);
             }
             else if (type[2] == 'v')
             {
                 fscanf(qry, "%d %d %lf", &j, &k, &y);
                 fprintf(textow, " %d %d %lf\n", j, k, y);
-                pontos += move_barco(listasSelec, 0, y, arvoreminas, lista, svg, j, k, textow);
+                pontos += move_barco(listasSelec, 0, y, arvoreminas, arvore, svg, j, k, textow);
             }
         }
         else if (type[0] == 's' && type[1] == 'e')
@@ -116,17 +131,17 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                 fprintf(textow, " %d %d\n", id, idc);
                 if (idc <= 10)
                 {
-                    elemento = getFirst(lista);
+                    elemento = getFirst(arvore);
                     while (elemento != NULL)
                     {
-                        barco = get(lista, elemento);
+                        barco = get(arvore, elemento);
                         switch (barco_get_tipo(barco))
                         {
                         case 'r':
                             if (id == retangulo_get_i(barco_get_info(barco)))
                             {
                                 barco_set_capitaoid(barco, idc);
-                                insert(listasSelec, barco);
+                                insert(listasSelec, barco, barco_get_area(barco));
                                 fprintf(textow, "Retângulo selecionado para nau capitã \nid: %d \ncor da borda: %s \ncor do preenchimento: %s \nárea: %lf \nX: %lf \nY: %lf \n", retangulo_get_i(barco_get_info(barco)), retangulo_get_corb(barco_get_info(barco)), retangulo_get_corp(barco_get_info(barco)), retangulo_get_area(barco_get_info(barco)), retangulo_get_x(barco_get_info(barco)), retangulo_get_y(barco_get_info(barco)));
                             }
                             break;
@@ -134,7 +149,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                             if (id == circulo_get_i(barco_get_info(barco)))
                             {
                                 barco_set_capitaoid(barco, idc);
-                                insert(listasSelec, barco);
+                                insert(listasSelec, barco, barco_get_area(barco));
                                 fprintf(textow, "círculo selecionado para nau capitã \nid: %d \ncor da borda: %s \ncor do preenchimento: %s \nraio: %lf \nárea: %lf \nX: %lf \nY: %lf \n", circulo_get_i(barco_get_info(barco)), circulo_get_corb(barco_get_info(barco)), circulo_get_corp(barco_get_info(barco)), circulo_get_r(barco_get_info(barco)), circulo_get_area(barco_get_info(barco)), circulo_get_x(barco_get_info(barco)), circulo_get_y(barco_get_info(barco)));
                             }
                             break;
@@ -142,7 +157,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                             if (id == texto_get_i(barco_get_info(barco)))
                             {
                                 barco_set_capitaoid(barco, idc);
-                                insert(listasSelec, barco);
+                                insert(listasSelec, barco, barco_get_area(barco));
                                 fprintf(textow, "texto selecionado para nau capitã \nid: %d \ncor da borda: %s \ncor do preenchimento: %s \nX: %lf \nY: %lf \ntexto: %s\n", texto_get_i(barco_get_info(barco)), texto_get_corb(barco_get_info(barco)), texto_get_corp(barco_get_info(barco)), texto_get_x(barco_get_info(barco)), texto_get_y(barco_get_info(barco)), texto_get_conteudo(barco_get_info(barco)));
                             }
                             break;
@@ -150,14 +165,14 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                             if (id == linha_get_i(barco_get_info(barco)))
                             {
                                 barco_set_capitaoid(barco, idc);
-                                insert(listasSelec, barco);
+                                insert(listasSelec, barco, barco_get_area(barco));
                                 fprintf(textow, "linha selecionada para nau capitã \nid: %d \ncor: %s \nX1: %lf \nY1: %lf \nX2: %lf \nY2: %lf \n", linha_get_i(barco_get_info(barco)), linha_get_cor(barco_get_info(barco)), linha_get_x1(barco_get_info(barco)), linha_get_y1(barco_get_info(barco)), linha_get_x2(barco_get_info(barco)), linha_get_y2(barco_get_info(barco)));
                             }
                             break;
                         default:
                             break;
                         }
-                        elemento = getNext(lista, elemento);
+                        elemento = getNext(arvore, elemento);
                     }
                 }
             }
@@ -165,16 +180,16 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
             {
                 fscanf(qry, "%d", &id);
                 fprintf(textow, " %d\n", id);
-                elemento = getFirst(lista);
+                elemento = getFirst(arvore);
                 while (elemento != NULL)
                 {
-                    barco = get(lista, elemento);
+                    barco = get(arvore, elemento);
                     switch (barco_get_tipo(barco))
                     {
                     case 'r':
                         if (retangulo_get_i(barco_get_info(barco)) == id)
                         {
-                            insert(listasSelec, barco);
+                            insert(listasSelec, barco, barco_get_area(barco));
                             fprintf(textow, "retângulo selecionado \nid: %d \ncor da borda: %s \ncor do preenchimento: %s \nárea: %lf \nX: %lf \nY: %lf \n", retangulo_get_i(barco_get_info(barco)), retangulo_get_corb(barco_get_info(barco)), retangulo_get_corp(barco_get_info(barco)), retangulo_get_area(barco_get_info(barco)), retangulo_get_x(barco_get_info(barco)), retangulo_get_y(barco_get_info(barco)));
                             break;
                         }
@@ -182,7 +197,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                     case 'c':
                         if (circulo_get_i(barco_get_info(barco)) == id)
                         {
-                            insert(listasSelec, barco);
+                            insert(listasSelec, barco, barco_get_area(barco));
                             fprintf(textow, "círculo selecionado \nid: %d \ncor da borda: %s \ncor do preenchimento: %s \nraio: %lf \nárea: %lf \nX: %lf \nY: %lf \n", circulo_get_i(barco_get_info(barco)), circulo_get_corb(barco_get_info(barco)), circulo_get_corp(barco_get_info(barco)), circulo_get_r(barco_get_info(barco)), circulo_get_area(barco_get_info(barco)), circulo_get_x(barco_get_info(barco)), circulo_get_y(barco_get_info(barco)));
                             break;
                         }
@@ -190,7 +205,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                     case 't':
                         if (texto_get_i(barco_get_info(barco)) == id)
                         {
-                            insert(listasSelec, barco);
+                            insert(listasSelec, barco, barco_get_area(barco));
                             fprintf(textow, "texto selecionado \nid: %d \ncor da borda: %s \ncor do preenchimento: %s \nX: %lf \nY: %lf \ntexto: %s\n", texto_get_i(barco_get_info(barco)), texto_get_corb(barco_get_info(barco)), texto_get_corp(barco_get_info(barco)), texto_get_x(barco_get_info(barco)), texto_get_y(barco_get_info(barco)), texto_get_conteudo(barco_get_info(barco)));
                             break;
                         }
@@ -198,7 +213,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                     case 'l':
                         if (linha_get_i(barco_get_info(barco)) == id)
                         {
-                            insert(listasSelec, barco);
+                            insert(listasSelec, barco, barco_get_area(barco));
                             fprintf(textow, "Linha selecionada \nid: %d \ncor: %s \nX1: %lf \nY1: %lf \nX2: %lf \nY2: %lf \n", linha_get_i(barco_get_info(barco)), linha_get_cor(barco_get_info(barco)), linha_get_x1(barco_get_info(barco)), linha_get_y1(barco_get_info(barco)), linha_get_x2(barco_get_info(barco)), linha_get_y2(barco_get_info(barco)));
                             break;
                         }
@@ -206,7 +221,7 @@ void qry_read(char *path, char *fileName, CPTree *arvore, FILE *svg, Lista *arvo
                     default:
                         break;
                     }
-                    elemento = getNext(lista, elemento);
+                    elemento = getNext(arvore, elemento);
                 }
             }
         }
